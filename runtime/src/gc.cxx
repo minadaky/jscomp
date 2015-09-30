@@ -3,6 +3,7 @@
 // root for complete license information.
 
 #include "jsc/jsruntime.h"
+#include <algorithm>
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -7,8 +7,13 @@ include(CheckCXXSourceCompiles)
 include(CheckIncludeFiles)
 include(CheckSymbolExists)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
+if(NOT MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDECLSPEC_NORETURN= ")
+else(NOT MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDECLSPEC_NORETURN=\"__declspec(noreturn)\" ")
+endif(NOT MSVC)
 
 CHECK_CXX_SOURCE_COMPILES("
 #include <map>
@@ -22,16 +27,19 @@ int main (int, char **) {
 
 CHECK_SYMBOL_EXISTS(srandomdev "stdlib.h" HAVE_SRANDOMDEV)
 
-CHECK_INCLUDE_FILES("endian.h" HAVE_ENDIAN_H)
-CHECK_INCLUDE_FILES("machine/endian.h" HAVE_MACHINE_ENDIAN_H)
+if(NOT MSVC)
+    CHECK_INCLUDE_FILES("endian.h" HAVE_ENDIAN_H)
+    CHECK_INCLUDE_FILES("machine/endian.h" HAVE_MACHINE_ENDIAN_H)
 
-if (${HAVE_ENDIAN_H})
-    set(ENDIAN_H <endian.h>)
-elseif (${HAVE_MACHINE_ENDIAN_H})
-    set(ENDIAN_H <machine/endian.h>)
-else()
-    message(SEND_ERROR "Cannot detect endian.h")
-endif()
+    if (${HAVE_ENDIAN_H})
+        set(ENDIAN_H <endian.h>)
+    elseif (${HAVE_MACHINE_ENDIAN_H})
+        set(ENDIAN_H <machine/endian.h>)
+    else()
+        message(SEND_ERROR "Cannot detect endian.h")
+    endif()
+endif(NOT MSVC)
+
 
 if (CMAKE_BUILD_TYPE MATCHES .*Deb.*)
     add_definitions(-DJS_DEBUG)
@@ -58,3 +66,5 @@ set(SOURCE_FILES
         src/fs.cpp
 )
 add_library(jsruntime ${SOURCE_FILES} )
+
+target_link_libraries(jsruntime dtoa)

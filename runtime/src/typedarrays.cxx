@@ -6,7 +6,11 @@
 #include "jsc/jsimpl.h"
 #include "jsc/config.h"
 
+#ifndef _MSC_VER
 #include ENDIAN_H
+#else
+#define BYTE_ORDER LITTLE_ENDIAN
+#endif
 
 namespace js {
 
@@ -45,7 +49,7 @@ TaggedValue ArrayBuffer::aConstructor (StackFrame * caller, Env * env, unsigned 
     return JS_UNDEFINED_VALUE;
 }
 
-TaggedValue ArrayBuffer::aFunction (StackFrame * caller, Env * env, unsigned argc, const TaggedValue * argv)
+DECLSPEC_NORETURN TaggedValue ArrayBuffer::aFunction (StackFrame * caller, Env * env, unsigned argc, const TaggedValue * argv)
 {
     throwTypeError(caller, "ArrayBuffer requires 'new'");
 }
@@ -60,7 +64,7 @@ bool DataView::mark (IMark * marker, unsigned markBit) const
     return markMemory(marker, markBit, this->buffer);
 }
 
-TaggedValue DataView::aFunction (StackFrame * caller, Env *, unsigned, const TaggedValue *)
+DECLSPEC_NORETURN TaggedValue DataView::aFunction (StackFrame * caller, Env *, unsigned, const TaggedValue *)
 {
     throwTypeError(caller, "DataView requires 'new'");
 }
@@ -103,7 +107,7 @@ bool ArrayBufferView::mark (IMark * marker, unsigned markBit) const
     return markMemory(marker, markBit, this->buffer);
 }
 
-TaggedValue ArrayBufferView::aFunction (StackFrame * caller, Env * env, unsigned argc, const TaggedValue * argv)
+DECLSPEC_NORETURN TaggedValue ArrayBufferView::aFunction (StackFrame * caller, Env * env, unsigned argc, const TaggedValue * argv)
 {
     throwTypeError(caller, "Typed array requires 'new'");
 }
