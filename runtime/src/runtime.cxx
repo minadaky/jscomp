@@ -8,6 +8,7 @@
 #include "jsc/sort.h"
 #include "jsc/dtoa.h"
 
+#include <algorithm>
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,6 +18,28 @@
 #include <tuple>
 #include <memory>
 
+#ifdef WIN32
+int
+vasprintf(
+	char ** ret,
+	const char * format,
+	va_list ap) {
+	int len;
+	/* Get Length */
+	len = _vsnprintf(NULL, 0, format, ap);
+	if (len < 0) return -1;
+	/* +1 for \0 terminator. */
+	*ret = (char*)malloc(len + 1);
+	/* Check malloc fail*/
+	if (!*ret) return -1;
+	/* Write String */
+	_vsnprintf(*ret, len + 1, format, ap);
+	/* Terminate explicitly */
+	(*ret)[len] = '\0';
+	return len;
+}
+#define strtok_r strtok_s
+#endif
 namespace js
 {
 
@@ -1566,10 +1589,12 @@ TaggedValue objectConstructor (StackFrame * caller, Env *, unsigned argc, const 
 TaggedValue functionFunction (StackFrame * caller, Env *, unsigned, const TaggedValue *)
 {
     throwTypeError(caller, "'Function' (module-level 'eval') is not supported in  static compiler");
+    return TaggedValue();
 }
-TaggedValue functionConstructor (StackFrame * caller, Env *, unsigned, const TaggedValue *)
+TaggedValue functionConstructor(StackFrame * caller, Env *, unsigned, const TaggedValue *)
 {
     throwTypeError(caller, "'Function' (module-level 'eval') is not supported in a static compiler");
+    return TaggedValue();
 }
 
 /**
@@ -2380,6 +2405,7 @@ TaggedValue typeErrorConstructor (StackFrame * caller, Env *, unsigned argc, con
 static TaggedValue strictThrower (StackFrame * caller, Env *, unsigned, const TaggedValue *)
 {
     throwTypeError(caller, "'caller', 'callee' and 'arguments' Function properties cannot be accessed in strict mode");
+	return TaggedValue();
 }
 
 bool Runtime::MemoryHead::mark (IMark *, unsigned) const
@@ -3000,7 +3026,7 @@ bool toBoolean (TaggedValue v)
         case VT_BOOLEAN:
             return v.raw.bval;
         case VT_NUMBER:
-            return !isnan(v.raw.nval) && v.raw.nval;
+            return !std::isnan(v.raw.nval) && v.raw.nval;
         case VT_STRINGPRIM:
             return v.raw.sval->byteLength != 0;
         default:
@@ -3119,9 +3145,9 @@ double primToNumber (TaggedValue v)
 
 double toInteger (double n)
 {
-    if (JS_UNLIKELY(isnan(n)))
+    if (JS_UNLIKELY(std::isnan(n)))
         return 0;
-    if (JS_UNLIKELY(!isfinite(n)))
+    if (JS_UNLIKELY(!std::isfinite(n)))
         return n;
     return n >= 0 ? floor(n) : ceil(n);
 }
