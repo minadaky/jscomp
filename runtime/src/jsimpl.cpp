@@ -4,6 +4,8 @@
 
 #include "jsc/jsimpl.h"
 
+#include <algorithm>
+
 namespace js {
 
 void StringBuilder::growTo (StackFrame * caller, size_t minSize)

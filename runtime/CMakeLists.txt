@@ -8,7 +8,9 @@ include(CheckIncludeFiles)
 include(CheckSymbolExists)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
+if(NOT MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
+endif(NOT MSVC)
 
 CHECK_CXX_SOURCE_COMPILES("
 #include <map>
@@ -58,3 +60,5 @@ set(SOURCE_FILES
         src/fs.cpp
 )
 add_library(jsruntime ${SOURCE_FILES} )
+
+target_link_libraries(jsruntime dtoa)

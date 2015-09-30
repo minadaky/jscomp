@@ -831,7 +831,7 @@ struct StackFrame
     unsigned line;
 #endif
     unsigned localCount;
-#ifdef JS_DEBUG
+#if defined(JS_DEBUG) || defined(MSVC)
     // locals[0] confused the heck out of GDB, so in debug mode we keep it as an 1-sized array
     TaggedValue locals[1];
 #else

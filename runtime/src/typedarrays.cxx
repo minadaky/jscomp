@@ -6,7 +6,11 @@
 #include "jsc/jsimpl.h"
 #include "jsc/config.h"
 
+#ifndef MSVC
 #include ENDIAN_H
+#else
+#define BYTE_ORDER LITTLE_ENDIAN
+#endif
 
 namespace js {
 
@@ -48,6 +52,7 @@ TaggedValue ArrayBuffer::aConstructor (StackFrame * caller, Env * env, unsigned 
 TaggedValue ArrayBuffer::aFunction (StackFrame * caller, Env * env, unsigned argc, const TaggedValue * argv)
 {
     throwTypeError(caller, "ArrayBuffer requires 'new'");
+    return TaggedValue();
 }
 
 InternalClass DataView::getInternalClass () const
@@ -63,6 +68,7 @@ bool DataView::mark (IMark * marker, unsigned markBit) const
 TaggedValue DataView::aFunction (StackFrame * caller, Env *, unsigned, const TaggedValue *)
 {
     throwTypeError(caller, "DataView requires 'new'");
+    return TaggedValue();
 }
 
 TaggedValue DataView::aConstructor (StackFrame * caller, Env *, unsigned argc, const TaggedValue * argv)
@@ -106,6 +112,7 @@ bool ArrayBufferView::mark (IMark * marker, unsigned markBit) const
 TaggedValue ArrayBufferView::aFunction (StackFrame * caller, Env * env, unsigned argc, const TaggedValue * argv)
 {
     throwTypeError(caller, "Typed array requires 'new'");
+    return TaggedValue();
 }
 
 TaggedValue ArrayBufferView::construct (StackFrame * caller, Env *, unsigned argc, const TaggedValue * argv)
